@@ -33,7 +33,6 @@ public final class HashSearcherTasks {
                 while (i < data.length && isPrintableChar(data[i])) {
                     possibleText.append((char) data[i]);
                     i++;
-                    if (possibleText.length() > 200) break; 
                 }
                 if (possibleText.length() > 0) {
                     String currentHash = CryptoUtils.calculateMD5(possibleText.toString());
@@ -66,11 +65,10 @@ public final class HashSearcherTasks {
                 while (i < data.length && isPrintableChar(data[i])) {
                     possibleText.append((char) data[i]);
                     i++;
-                    if (possibleText.length() > 200) break;
                 }
                 if (possibleText.length() > 0) {
                     String currentHash = CryptoUtils.calculateSHA1(possibleText.toString());
-                    if (currentHash != null && hash.equalsIgnoreCase(currentHash)) {
+                    if (hash.equalsIgnoreCase(currentHash)) {
                         return possibleText.toString();
                     }
                 }
@@ -101,15 +99,12 @@ public final class HashSearcherTasks {
                 while (i < data.length && isPrintableChar(data[i])) {
                     possibleText.append((char) data[i]);
                     i++;
-                    if (possibleText.length() > 256) { // Max length for SHA256 search
-                        break;
-                    }
                 }
 
                 if (possibleText.length() > 0) {
                     String text = possibleText.toString();
                     String currentHash = CryptoUtils.calculateSHA256(text);
-                    if (currentHash != null && hash.equalsIgnoreCase(currentHash)) {
+                    if (hash.equalsIgnoreCase(currentHash)) {
                         return text;
                     }
                 }

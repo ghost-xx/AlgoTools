@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -136,10 +137,8 @@ public class HashAnalysisFragment extends Fragment {
             crackType = "MD5";
         } else if (canCrackSHA1) {
             crackType = "SHA-1";
-        } else if (canCrackSHA256) {
-            crackType = "SHA-256";
         } else {
-            crackType = "Unknown";
+            crackType = "SHA-256";
         }
 
         executorService.execute(() -> {
@@ -168,7 +167,7 @@ public class HashAnalysisFragment extends Fragment {
             
             long startTime = System.currentTimeMillis();
 
-            try (InputStream fis = new FileInputStream(dumpFile)) {
+            try (InputStream fis = Files.newInputStream(dumpFile.toPath())) {
                 byte[] currentChunkPlusOverlap = new byte[CHUNK_SIZE + OVERLAP_SIZE];
                 byte[] previousOverlap = new byte[OVERLAP_SIZE];
                 Arrays.fill(previousOverlap, (byte)0);

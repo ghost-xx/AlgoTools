@@ -28,6 +28,8 @@ public class FloatingWindowManager {
 
     public interface FloatingWindowCallback {
         void onDumpButtonClicked();
+
+
         void onCloseButtonClicked();
     }
 

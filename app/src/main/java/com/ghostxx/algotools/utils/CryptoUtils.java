@@ -73,12 +73,11 @@ public class CryptoUtils {
             return null;
         }
 
-        int numThreads = Runtime.getRuntime().availableProcessors();
+        int numThreads = Runtime.getRuntime().availableProcessors();//
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
         List<Callable<String>> tasks = new ArrayList<>();
         int chunkSize = memoryData.length / numThreads;
         int overlapSize = 1024;
-
         for (int i = 0; i < numThreads; i++) {
             int start = i * chunkSize;
             int end = (i == numThreads - 1) ? memoryData.length : (i + 1) * chunkSize + overlapSize;
@@ -227,8 +226,7 @@ public class CryptoUtils {
             }
 
             if (start >= end) {
-                if (i == 0 && memoryData.length > 0) { // Ensure at least one task if data exists
-                    start = 0;
+                if (i == 0) { // Ensure at least one task if data exists
                     end = memoryData.length;
                     byte[] chunk = Arrays.copyOfRange(memoryData, start, end);
                     tasks.add(new HashSearcherTasks.SHA256Searcher(hash, chunk)); // Updated

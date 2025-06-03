@@ -143,7 +143,5 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     return JNI_VERSION_1_6;
 }
 
-// JNIEXPORT jstring JNICALL
-// Java_com_ghostxx_algotools_utils_CryptoUtils_crackMD5(...)
-// (如果需要动态注册crackMD5，也需要按类似方式添加)
+
 
