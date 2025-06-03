@@ -5,8 +5,8 @@
 #include <array>
 #include <cstdint>
 #include <algorithm> // For std::copy
-#include <iomanip>   // For std::setw, std::setfill, std::hex
-#include <sstream>   // For std::ostringstream
+#include <iomanip>   // For std::set, std::set fill, std::hex
+#include <sstream>   // For std::upstreaming
 
 namespace hashing {
 namespace sha1 {
@@ -26,7 +26,7 @@ static std::string sig2hex(const uint8_t *sig) {
     return oss.str();
 }
 
-// The SHA-1 algorithm itself, taking in a bytestring.
+// The SHA-1 algorithm itself, taking in a byte string.
 // Returns a pointer to a 20-byte array (raw hash). Caller must delete.
 static uint8_t* hash_bs(const void *input_bs, uint64_t input_size) {
     auto* input = static_cast<const uint8_t*>(input_bs);
@@ -38,7 +38,7 @@ static uint8_t* hash_bs(const void *input_bs, uint64_t input_size) {
     uint32_t h3 = 0x10325476;
     uint32_t h4 = 0xC3D2E1F0;
 
-    // Step 1: Processing the bytestring
+    // Step 1: Processing the byte string
     uint64_t padded_message_size = 0;
     if (input_size % 64 < 56) {
         padded_message_size = input_size + 64 - (input_size % 64);
@@ -127,7 +127,7 @@ static uint8_t* hash_bs(const void *input_bs, uint64_t input_size) {
     return sig;
 }
 
-// Converts the string to bytestring and calls the main algorithm.
+// Converts the string to byte string and calls the main algorithm.
 // Returns a 40-char hex string.
 std::string hash(const std::string &message) {
     if (message.empty()) { // Handle empty string case explicitly for safety with .data()

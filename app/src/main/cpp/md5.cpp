@@ -1,7 +1,6 @@
 #include "md5.h"
 #include <iomanip>
 #include <sstream>
-#include <future>
 
 // MD5转换要使用的常量表
 const uint32_t k[64] = {
@@ -150,52 +149,4 @@ std::string MD5::calculate(const std::string& input) {
         ss << std::setw(2) << (int)i;
         
     return ss.str();
-}
-
-__attribute__((unused)) std::string MD5::crack(const std::string& hash, const std::vector<std::string>& candidates, int threadCount) {
-    if (candidates.empty() || threadCount <= 0) {
-        return "";
-    }
-
-    // 计算每个线程处理的数量
-    const size_t total = candidates.size();
-    const size_t batchSize = (total + static_cast<size_t>(threadCount) - 1) / static_cast<size_t>(threadCount);
-    
-    // 创建线程池
-    std::vector<std::future<std::string>> futures;
-    
-    // 分配任务给每个线程
-    for (size_t i = 0; i < static_cast<size_t>(threadCount); i++) {
-        const size_t start = i * batchSize;
-        if (start >= total) break;
-        
-        const size_t end = std::min(start + batchSize, total);
-        std::vector<std::string> batch(candidates.begin() + static_cast<std::ptrdiff_t>(start), 
-                                     candidates.begin() + static_cast<std::ptrdiff_t>(end));
-        
-        // 启动线程并保存future
-        futures.push_back(std::async(std::launch::async, 
-            &MD5::crackBatch, hash, batch));
-    }
-    
-    // 等待所有线程完成并检查结果
-    for (auto& f : futures) {
-        std::string result = f.get();
-        if (!result.empty()) {
-            return result;
-        }
-    }
-    
-    return "";
-}
-
-std::string MD5::crackBatch(const std::string& hash, const std::vector<std::string>& candidates) {
-    MD5 md5;
-    for (const auto& candidate : candidates) {
-        std::string currentHash = md5.calculate(candidate);
-        if (hash == currentHash) {
-            return candidate;
-        }
-    }
-    return "";
 } 

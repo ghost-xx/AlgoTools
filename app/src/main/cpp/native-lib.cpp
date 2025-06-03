@@ -40,44 +40,45 @@ __attribute__((unused)) std::vector<std::string> extractPrintableStrings(const u
 }
 
 // 原生函数的实现
-static void setJniLoggingEnabled_native(JNIEnv* env, jclass clazz, jboolean enabled) {
+static void setJniLoggingEnabled_native(__attribute__((unused)) JNIEnv* env,
+                                        __attribute__((unused)) jclass clazz, jboolean enabled) {
     gEnableJniLog = enabled;
-    LOG("JNI 日志记录设置为: %s", enabled ? "开启" : "关闭");
+    LOG("JNI 日志记录设置为: %s", enabled ? "开启" : "关闭")
 }
 
-static jstring calculateMD5_native(JNIEnv* env, jclass clazz, jstring input) {
-    const char* nativeString = env->GetStringUTFChars(input, 0);
+static jstring calculateMD5_native(JNIEnv* env, __attribute__((unused)) jclass clazz, jstring input) {
+    const char* nativeString = env->GetStringUTFChars(input, nullptr);
     LOG("正在为输入计算 MD5: %s", nativeString)
     MD5 md5;
     std::string result_str = md5.calculate(nativeString);
-    LOG("MD5 结果: %s", result_str.c_str());
+    LOG("MD5 结果: %s", result_str.c_str())
     env->ReleaseStringUTFChars(input, nativeString);
     return env->NewStringUTF(result_str.c_str());
 }
 
 // 为 calculateSHA1 添加 JNI 实现
-static jstring calculateSHA1_native(JNIEnv* env, jclass clazz, jstring input) {
+static jstring calculateSHA1_native(JNIEnv* env, __attribute__((unused)) jclass clazz, jstring input) {
     if (input == nullptr) {
-        LOG("calculateSHA1_native: 输入字符串为 null");
+        LOG("calculateSHA1_native: 输入字符串为 null")
         return nullptr;
     }
     const char* nativeString = env->GetStringUTFChars(input, nullptr);
     if (nativeString == nullptr) {
-        LOG("calculateSHA1_native: GetStringUTFChars 失败");
+        LOG("calculateSHA1_native: GetStringUTFChars 失败")
         return nullptr; // GetStringUTFChars 失败可能因为内存不足
     }
-    LOG("正在为输入计算 SHA1: %s", nativeString);
+    LOG("正在为输入计算 SHA1: %s", nativeString)
     std::string input_str(nativeString);
     std::string result_str = hashing::sha1::hash(input_str);
-    LOG("SHA1 结果: %s", result_str.c_str());
+    LOG("SHA1 结果: %s", result_str.c_str())
     env->ReleaseStringUTFChars(input, nativeString);
     return env->NewStringUTF(result_str.c_str());
 }
 
 // 为 calculateSHA256 添加 JNI 实现
-static jstring calculateSHA256_native(JNIEnv* env, jclass clazz, jstring input) {
+static jstring calculateSHA256_native(JNIEnv* env, __attribute__((unused)) jclass clazz, jstring input) {
     if (input == nullptr) {
-        LOG("calculateSHA256_native: 输入字符串为 null");
+        LOG("calculateSHA256_native: 输入字符串为 null")
         return nullptr;
     }
     const char* nativeString = env->GetStringUTFChars(input, nullptr);
@@ -87,9 +88,8 @@ static jstring calculateSHA256_native(JNIEnv* env, jclass clazz, jstring input) 
     }
     LOG("正在为输入计算 SHA256: %s", nativeString)
     std::string input_str(nativeString);
-    SHA256 sha256;
     std::string result_str = sha256(input_str);
-    LOG("SHA256 结果: %s", result_str.c_str());
+    LOG("SHA256 结果: %s", result_str.c_str())
     env->ReleaseStringUTFChars(input, nativeString);
     return env->NewStringUTF(result_str.c_str());
 }
@@ -119,7 +119,7 @@ static const JNINativeMethod gMethods[] = {
 };
 
 // JNI_OnLoad 函数，在库加载时调用
-jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+jint JNI_OnLoad(JavaVM* vm, __attribute__((unused)) void* reserved) {
     JNIEnv* env = nullptr;
     if (vm->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK) {
         LOG("JNI_OnLoad: GetEnv 失败")
@@ -128,7 +128,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
     jclass clazz = env->FindClass("com/ghostxx/algotools/utils/CryptoUtils");
     if (clazz == nullptr) {
-        LOG("JNI_OnLoad: 找不到类 com/ghostxx/algotools/utils/CryptoUtils");
+        LOG("JNI_OnLoad: 找不到类 com/ghostxx/algotools/utils/CryptoUtils")
         return JNI_ERR;
     }
 

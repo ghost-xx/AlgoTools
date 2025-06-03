@@ -9,8 +9,10 @@ add_library(
         SHARED
         native-lib.cpp
         md5.cpp
+        md5.h
         sha1.cpp
-        sha256.cpp
+        sha1.h
+        sha256.h
 )
 
 
@@ -21,4 +23,5 @@ find_library(
 target_link_libraries(
         algotools
         ${log-lib}
+        android
 )

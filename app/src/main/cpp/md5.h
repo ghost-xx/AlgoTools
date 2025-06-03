@@ -4,15 +4,11 @@
 #include <string>
 #include <cstring>
 #include <cstdint>
-#include <vector>
-#include <thread>
-#include <future>
 
 class MD5 {
 public:
     MD5();
     std::string calculate(const std::string& input);
-    __attribute__((unused)) static std::string crack(const std::string& hash, const std::vector<std::string>& candidates, int threadCount);
 
 private:
     // MD5的四个寄存器
@@ -34,9 +30,6 @@ private:
     static uint32_t H(uint32_t x, uint32_t y, uint32_t z) { return x ^ y ^ z; }
     static uint32_t I(uint32_t x, uint32_t y, uint32_t z) { return y ^ (x | ~z); }
     static uint32_t rotate_left(uint32_t x, int n) { return (x << n) | (x >> (32 - n)); }
-
-    // 新增的破解辅助函数
-    static std::string crackBatch(const std::string& hash, const std::vector<std::string>& candidates);
 };
 
 #endif
