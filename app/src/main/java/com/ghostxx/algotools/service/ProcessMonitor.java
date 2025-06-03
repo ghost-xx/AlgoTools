@@ -43,6 +43,7 @@ public class ProcessMonitor {
             "com.iflytek.inputmethod", // 讯飞输入法
             "com.touchtype.swiftkey", // SwiftKey
             "com.ghostxx.algotools",
+
             // 其他可能需要忽略的系统界面或服务
             "com.android.systemui",
             "com.miui.home"
