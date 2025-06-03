@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="4dp">
+    
+    <TextView
+        android:id="@+id/tv_app_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="包名"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        tools:ignore="HardcodedText" />
+        
+    <TextView
+        android:id="@+id/tv_app_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PID: 0"
+        android:textColor="#AAAAAA"
+        android:textSize="10sp"
+        android:singleLine="true"
+        tools:ignore="HardcodedText,SmallSp" />
+        
+</LinearLayout> 

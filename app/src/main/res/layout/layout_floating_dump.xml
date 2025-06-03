@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#80000000"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        
+        <TextView
+            android:id="@+id/tv_process_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="等待获取应用信息..."
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:maxWidth="150dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:ignore="HardcodedText" />
+            
+        <ImageButton
+            android:id="@+id/btn_expand"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_save"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_marginStart="4dp"
+            android:contentDescription="转储内存并显示日志"
+            tools:ignore="HardcodedText" />
+            
+        <ImageButton
+            android:id="@+id/btn_close"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_marginStart="4dp"
+            android:contentDescription="关闭"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/expanded_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+        
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#40FFFFFF">
+            
+            <TextView
+                android:id="@+id/tv_log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:padding="4dp"
+                android:minHeight="60dp"
+                android:maxHeight="200dp" />
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout> 
