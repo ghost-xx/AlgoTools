@@ -1,43 +1,22 @@
 #include <jni.h>
 #include <string>
-#include <vector>
-#include <thread>
+#include <cstring>
 #include <android/log.h>
-#include "md5.h"
-#include "sha1.h"
-#include "sha256.h"
+#include "hash_calculator.h"
+#include "string_search.h"
+#include "memory_utils.h"
 
 // Define a log tag
 #define LOG_TAG "JNI信息"
 
-static bool gEnableJniLog = false; // 默认关闭JNI日志
+// 定义全局日志开关变量，供其他模块使用
+bool gEnableJniLog = false; // 默认关闭JNI日志
 
 // 更新LOG宏以检查gEnableJniLog
 #define LOG(...)\
     if (gEnableJniLog) { \
         __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__); \
     }
-
-// 辅助函数：从内存数据中提取可打印字符串
-__attribute__((unused)) std::vector<std::string> extractPrintableStrings(const uint8_t* data, size_t length) {
-    std::vector<std::string> result;
-    std::string current;
-    
-    for (size_t i = 0; i < length; i++) {
-        if ((data[i] >= 32 && data[i] < 127) || data[i] < 0) {
-            current += (char)data[i];
-        } else if (!current.empty()) {
-            if (current.length() >= 4) { // 只保留长度大于等于4的字符串
-                result.push_back(current);
-            }
-            current.clear();
-        }
-    }
-    if (!current.empty() && current.length() >= 4) {
-        result.push_back(current);
-    }
-    return result;
-}
 
 // 原生函数的实现
 static void setJniLoggingEnabled_native(__attribute__((unused)) JNIEnv* env,
@@ -46,52 +25,132 @@ static void setJniLoggingEnabled_native(__attribute__((unused)) JNIEnv* env,
     LOG("JNI 日志记录设置为: %s", enabled ? "开启" : "关闭")
 }
 
-static jstring calculateMD5_native(JNIEnv* env, __attribute__((unused)) jclass clazz, jstring input) {
-    const char* nativeString = env->GetStringUTFChars(input, nullptr);
-    LOG("正在为输入计算 MD5: %s", nativeString)
-    MD5 md5;
-    std::string result_str = md5.calculate(nativeString);
-    LOG("MD5 结果: %s", result_str.c_str())
-    env->ReleaseStringUTFChars(input, nativeString);
-    return env->NewStringUTF(result_str.c_str());
+// 使用增强版Boyer-Moore算法在内存块中搜索特征字符串
+static jboolean containsFeatureString_native(JNIEnv* env, __attribute__((unused)) jclass clazz, 
+                                            jbyteArray data, jint dataLength, jstring featureStr) {
+    if (data == nullptr || featureStr == nullptr) {
+        LOG("containsFeatureString_native: 输入为 null")
+        return JNI_FALSE;
+    }
+    
+    // 获取特征字符串
+    const char* nativeFeatureStr = env->GetStringUTFChars(featureStr, nullptr);
+    if (nativeFeatureStr == nullptr) {
+        LOG("containsFeatureString_native: GetStringUTFChars 失败")
+        return JNI_FALSE;
+    }
+    
+    int featureLength = env->GetStringUTFLength(featureStr);
+    if (featureLength == 0) {
+        env->ReleaseStringUTFChars(featureStr, nativeFeatureStr);
+        return JNI_TRUE; // 空特征字符串总是匹配
+    }
+    
+    // 获取数据数组
+    jbyte* nativeData = env->GetByteArrayElements(data, nullptr);
+    if (nativeData == nullptr) {
+        LOG("containsFeatureString_native: GetByteArrayElements 失败")
+        env->ReleaseStringUTFChars(featureStr, nativeFeatureStr);
+        return JNI_FALSE;
+    }
+    
+    // 执行搜索
+    bool found = searchInMemory(
+        reinterpret_cast<const uint8_t*>(nativeData), 
+        dataLength,
+        reinterpret_cast<const uint8_t*>(nativeFeatureStr), 
+        featureLength
+    );
+    
+    // 释放资源
+    env->ReleaseByteArrayElements(data, nativeData, JNI_ABORT);
+    env->ReleaseStringUTFChars(featureStr, nativeFeatureStr);
+    
+    return found ? JNI_TRUE : JNI_FALSE;
 }
 
-// 为 calculateSHA1 添加 JNI 实现
-static jstring calculateSHA1_native(JNIEnv* env, __attribute__((unused)) jclass clazz, jstring input) {
-    if (input == nullptr) {
-        LOG("calculateSHA1_native: 输入字符串为 null")
+// 在内存块中搜索哈希值对应的原文
+static jstring findHashOriginal_native(JNIEnv* env, __attribute__((unused)) jclass clazz,
+                                      jbyteArray data, jint dataLength, jstring hashValue,
+                                      jstring hashType, jstring featureStr) {
+    if (data == nullptr || hashValue == nullptr || hashType == nullptr) {
+        LOG("findHashOriginal_native: 输入参数为 null")
         return nullptr;
     }
-    const char* nativeString = env->GetStringUTFChars(input, nullptr);
-    if (nativeString == nullptr) {
-        LOG("calculateSHA1_native: GetStringUTFChars 失败")
-        return nullptr; // GetStringUTFChars 失败可能因为内存不足
-    }
-    LOG("正在为输入计算 SHA1: %s", nativeString)
-    std::string input_str(nativeString);
-    std::string result_str = hashing::sha1::hash(input_str);
-    LOG("SHA1 结果: %s", result_str.c_str())
-    env->ReleaseStringUTFChars(input, nativeString);
-    return env->NewStringUTF(result_str.c_str());
-}
-
-// 为 calculateSHA256 添加 JNI 实现
-static jstring calculateSHA256_native(JNIEnv* env, __attribute__((unused)) jclass clazz, jstring input) {
-    if (input == nullptr) {
-        LOG("calculateSHA256_native: 输入字符串为 null")
+    
+    // 获取哈希值
+    const char* nativeHashValue = env->GetStringUTFChars(hashValue, nullptr);
+    if (nativeHashValue == nullptr) {
+        LOG("findHashOriginal_native: GetStringUTFChars 失败 (hashValue)")
         return nullptr;
     }
-    const char* nativeString = env->GetStringUTFChars(input, nullptr);
-    if (nativeString == nullptr) {
-        LOG("calculateSHA256_native: GetStringUTFChars 失败")
-        return nullptr; // GetStringUTFChars 失败可能因为内存不足
+    
+    // 获取哈希类型
+    const char* nativeHashType = env->GetStringUTFChars(hashType, nullptr);
+    if (nativeHashType == nullptr) {
+        env->ReleaseStringUTFChars(hashValue, nativeHashValue);
+        LOG("findHashOriginal_native: GetStringUTFChars 失败 (hashType)")
+        return nullptr;
     }
-    LOG("正在为输入计算 SHA256: %s", nativeString)
-    std::string input_str(nativeString);
-    std::string result_str = sha256(input_str);
-    LOG("SHA256 结果: %s", result_str.c_str())
-    env->ReleaseStringUTFChars(input, nativeString);
-    return env->NewStringUTF(result_str.c_str());
+    
+    // 获取特征字符串（如果有）
+    const char* nativeFeatureStr = nullptr;
+    if (featureStr != nullptr) {
+        nativeFeatureStr = env->GetStringUTFChars(featureStr, nullptr);
+    }
+    // 获取数据数组
+    jbyte* nativeData = env->GetByteArrayElements(data, nullptr);
+    if (nativeData == nullptr) {
+        env->ReleaseStringUTFChars(hashValue, nativeHashValue);
+        env->ReleaseStringUTFChars(hashType, nativeHashType);
+        if (nativeFeatureStr != nullptr) {
+            env->ReleaseStringUTFChars(featureStr, nativeFeatureStr);
+        }
+        LOG("findHashOriginal_native: GetByteArrayElements 失败")
+        return nullptr;
+    }
+    
+    // 如果有特征字符串，先检查是否包含它
+    if (nativeFeatureStr != nullptr && strlen(nativeFeatureStr) > 0) {
+        bool containsFeature = searchInMemory(
+            reinterpret_cast<const uint8_t*>(nativeData),
+            dataLength,
+            reinterpret_cast<const uint8_t*>(nativeFeatureStr),
+            strlen(nativeFeatureStr)
+        );
+        
+        if (!containsFeature) {
+            // 释放资源
+            env->ReleaseByteArrayElements(data, nativeData, JNI_ABORT);
+            env->ReleaseStringUTFChars(hashValue, nativeHashValue);
+            env->ReleaseStringUTFChars(hashType, nativeHashType);
+            env->ReleaseStringUTFChars(featureStr, nativeFeatureStr);
+            return nullptr;
+        }
+    }
+    
+    // 在内存中查找哈希值对应的原文
+    std::string foundPlaintext = findHashOriginalInMemory(
+        reinterpret_cast<const uint8_t*>(nativeData),
+        dataLength,
+        nativeHashValue,
+        nativeHashType
+    );
+    
+    // 释放资源
+    env->ReleaseByteArrayElements(data, nativeData, JNI_ABORT);
+    env->ReleaseStringUTFChars(hashValue, nativeHashValue);
+    env->ReleaseStringUTFChars(hashType, nativeHashType);
+    if (nativeFeatureStr != nullptr) {
+        env->ReleaseStringUTFChars(featureStr, nativeFeatureStr);
+    }
+    
+    // 返回结果
+    if (!foundPlaintext.empty()) {
+        return env->NewStringUTF(foundPlaintext.c_str());
+    } else {
+        return nullptr;
+    }
 }
 
 // JNINativeMethod 数组，用于动态注册
@@ -115,6 +174,26 @@ static const JNINativeMethod gMethods[] = {
         "calculateSHA256",
         "(Ljava/lang/String;)Ljava/lang/String;",
         (void*)calculateSHA256_native
+    },
+    {
+        "calculateSHA384",
+        "(Ljava/lang/String;)Ljava/lang/String;",
+        (void*)calculateSHA384_native
+    },
+    {
+        "calculateSHA512",
+        "(Ljava/lang/String;)Ljava/lang/String;",
+        (void*)calculateSHA512_native
+    },
+    {
+        "containsFeatureString",
+        "([BILjava/lang/String;)Z",
+        (void*)containsFeatureString_native
+    },
+    {
+        "findHashOriginal",
+        "([BILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+        (void*)findHashOriginal_native
     }
 };
 

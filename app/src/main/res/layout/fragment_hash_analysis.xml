@@ -35,6 +35,30 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/featureInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        app:endIconMode="clear_text"
+        app:hintEnabled="true"
+        android:hint="特征字符串（可选）"
+        tools:ignore="ContentDescription,HardcodedText">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/featureInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textSize="12sp"
+            android:imeOptions="actionDone"
+            android:textColor="@android:color/black"
+            tools:ignore="HardcodedText,ContentDescription" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <CheckBox
         android:id="@+id/jniLoggingCheckbox"
         android:layout_width="wrap_content"

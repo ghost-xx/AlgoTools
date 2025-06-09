@@ -1,5 +1,6 @@
 package com.ghostxx.algotools.service;
 
+import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -27,7 +28,8 @@ import java.util.TreeMap;
  */
 public class ProcessMonitor {
     private static final String TAG = "ProcessMonitor";
-    private final Context context;
+    @SuppressLint("StaticFieldLeak")
+    private static Context context;
 
     // 包名黑名单，这些包名将被忽略
     private static final Set<String> PACKAGE_BLACKLIST = new HashSet<>(Arrays.asList(
@@ -51,7 +53,7 @@ public class ProcessMonitor {
     ));
 
     public ProcessMonitor(Context context) {
-        this.context = context;
+        ProcessMonitor.context = context;
     }
 
     /**
@@ -59,7 +61,7 @@ public class ProcessMonitor {
      * @param packageName 要检查的包名
      * @return 如果在黑名单中则返回 true，否则返回 false
      */
-    private boolean isBlacklisted(String packageName) {
+    private static boolean isBlacklisted(String packageName) {
         if (packageName == null || packageName.isEmpty()) {
             return false;
         }
@@ -74,7 +76,7 @@ public class ProcessMonitor {
      * 获取前台应用包名，尝试多种方法
      * @return 前台应用包名，如果获取失败则返回空字符串
      */
-    public String getForegroundAppPackageName() {
+    public static String getForegroundAppPackageName() {
         String pkgName;
 
         // 方法0: 使用UsageStatsManager (最可靠但需要特殊权限)
@@ -206,7 +208,7 @@ public class ProcessMonitor {
      * 使用UsageStats API获取前台应用包名
      * @return 前台应用包名，如果获取失败则返回空字符串
      */
-    private String getForegroundAppUsingUsageStats() {
+    private static String getForegroundAppUsingUsageStats() {
         try {
             UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
             long currentTime = System.currentTimeMillis();
@@ -249,7 +251,7 @@ public class ProcessMonitor {
      * 检查是否有使用情况统计权限
      * @return true如果有权限，false如果没有
      */
-    public boolean hasUsageStatsPermission() {
+    public static boolean hasUsageStatsPermission() {
         try {
             // 使用AppOpsManager更准确地检测权限
             AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
@@ -296,7 +298,7 @@ public class ProcessMonitor {
      * @param packageName 应用包名
      * @return 进程ID，如果未找到则返回-1
      */
-    public int getPidByPackageName(String packageName) {
+    public static int getPidByPackageName(String packageName) {
         try {
             // 添加日志以便调试
             Log.d(TAG, "尝试获取包名 " + packageName + " 的PID");
@@ -362,7 +364,7 @@ public class ProcessMonitor {
      * @param packageName 应用包名
      * @return 应用名称，如果获取失败则返回包名
      */
-    public String getAppName(String packageName) {
+    public static String getAppName(String packageName) {
         if (packageName == null || packageName.isEmpty()) {
             return "无应用";
         }
@@ -395,7 +397,7 @@ public class ProcessMonitor {
         }
     }
 
-    public AppInfo getForegroundApp() {
+    public static AppInfo getForegroundApp() {
         String packageName = getForegroundAppPackageName();
         int pid = getPidByPackageName(packageName);
         String appName = getAppName(packageName);

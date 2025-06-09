@@ -34,10 +34,7 @@
             </intent-filter>
         </activity>
         
-        <activity
-            android:name=".AnalysisActivity"
-            android:label="内存分析"
-            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
+
         
         <service
             android:name=".service.FloatingDumpService"
