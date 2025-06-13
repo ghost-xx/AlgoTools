@@ -24,18 +24,27 @@ std::vector<std::string> extractPrintableStrings(const uint8_t* data, size_t len
     std::string current;
     
     for (size_t i = 0; i < length; i++) {
-        if ((data[i] >= 32 && data[i] < 127) || data[i] < 0) {
+        // 改进处理逻辑，包含几乎所有可打印字符，包括特殊字符
+        // ASCII 9(Tab), 10(LF), 13(CR) 和 32-126 的可打印字符都保留
+        // 同时保留所有可能的UTF-8字符（>= 128）
+        if ((data[i] == 9) || (data[i] == 10) || (data[i] == 13) || 
+            (data[i] >= 32 && data[i] <= 126) || // ASCII可打印字符，包括 . / 等特殊字符
+            (data[i] >= 128)) {                  // 可能是UTF-8多字节字符的一部分
             current += (char)data[i];
         } else if (!current.empty()) {
-            if (current.length() >= 4) { // 只保留长度大于等于4的字符串
+            if (current.length() >= 2) { // 进一步降低最小长度阈值，甚至包括短密码
                 result.push_back(current);
             }
             current.clear();
         }
     }
-    if (!current.empty() && current.length() >= 4) {
+    if (!current.empty() && current.length() >= 2) {
         result.push_back(current);
     }
+    
+    // 简化日志
+    LOG("提取到 %d 个可能的字符串", result.size());
+    
     return result;
 }
 
@@ -45,6 +54,8 @@ std::string findHashOriginalInMemory(const uint8_t* data, size_t dataLength,
                                     const std::string& hashType) {
     // 从数据中提取可能的文本
     std::vector<std::string> possibleTexts = extractPrintableStrings(data, dataLength);
+    
+    LOG("开始比较哈希值，目标类型: %s, 值: %s", hashType.c_str(), hashValue.c_str());
     
     // 对每个可能的文本计算哈希值并比较
     for (const auto& text : possibleTexts) {
@@ -64,12 +75,18 @@ std::string findHashOriginalInMemory(const uint8_t* data, size_t dataLength,
             calculatedHash = sha512(text);
         }
         
-        // 比较哈希值（不区分大小写）
-        if (strcasecmp(calculatedHash.c_str(), hashValue.c_str()) == 0) {
+        // 将计算出的哈希转换为小写以便比较
+        std::transform(calculatedHash.begin(), calculatedHash.end(), calculatedHash.begin(), 
+                     [](unsigned char c){ return std::tolower(c); });
+        
+        // 比较哈希值
+        if (calculatedHash == hashValue) {
+            LOG("找到匹配的原文: '%s', 哈希值: %s", text.c_str(), calculatedHash.c_str());
             return text;
         }
     }
     
+    LOG("未找到匹配的原文");
     // 如果没有找到匹配的原文，返回空字符串
     return "";
 } 

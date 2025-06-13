@@ -85,6 +85,11 @@ static jstring findHashOriginal_native(JNIEnv* env, __attribute__((unused)) jcla
         return nullptr;
     }
     
+    // 转换哈希值为小写
+    std::string hashValueStr(nativeHashValue);
+    std::transform(hashValueStr.begin(), hashValueStr.end(), hashValueStr.begin(), 
+                  [](unsigned char c){ return std::tolower(c); });
+    
     // 获取哈希类型
     const char* nativeHashType = env->GetStringUTFChars(hashType, nullptr);
     if (nativeHashType == nullptr) {
@@ -129,13 +134,20 @@ static jstring findHashOriginal_native(JNIEnv* env, __attribute__((unused)) jcla
         }
     }
     
+    // 启用JNI日志以帮助调试中文处理问题
+    bool originalLogState = gEnableJniLog;
+    gEnableJniLog = true;
+    
     // 在内存中查找哈希值对应的原文
     std::string foundPlaintext = findHashOriginalInMemory(
         reinterpret_cast<const uint8_t*>(nativeData),
         dataLength,
-        nativeHashValue,
+        hashValueStr,
         nativeHashType
     );
+    
+    // 恢复日志状态
+    gEnableJniLog = originalLogState;
     
     // 释放资源
     env->ReleaseByteArrayElements(data, nativeData, JNI_ABORT);
@@ -147,8 +159,10 @@ static jstring findHashOriginal_native(JNIEnv* env, __attribute__((unused)) jcla
     
     // 返回结果
     if (!foundPlaintext.empty()) {
+        LOG("返回找到的原文: %s", foundPlaintext.c_str());
         return env->NewStringUTF(foundPlaintext.c_str());
     } else {
+        LOG("未找到原文");
         return nullptr;
     }
 }

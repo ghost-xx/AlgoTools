@@ -1,17 +1,26 @@
 package com.ghostxx.algotools.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 import android.util.Log;
 
+import com.ghostxx.algotools.model.AnalysisResult;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+
 public class CryptoUtils {
+    private static final String TAG = "CryptoUtils";
+    
     static {
-        System.loadLibrary("algotools");
+        try {
+            System.loadLibrary("algotools");
+            Log.i(TAG, "algotools loaded successfully");
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(TAG, "Failed to load algotools", e);
+        }
     }
     
-    private static final String TAG = "CryptoUtils";
-
     /**
      * 获取系统可用的处理器核心数
      * @return CPU核心数
@@ -28,16 +37,6 @@ public class CryptoUtils {
         // 使用可用处理器数量的2倍作为并行度
         return Math.max(2, Runtime.getRuntime().availableProcessors() * 2);
     }
-
-    /**
-     * 获取当前活跃线程数（包括正在运行和等待的线程）
-     * @return 当前活跃的线程数，至少返回1
-     */
-    public static int getActiveThreadCount() {
-        // 由于不再使用ForkJoinPool，返回估计值
-        return Math.max(1, Runtime.getRuntime().availableProcessors());
-    }
-
 
     /**
      * 计算字符串的MD5值
@@ -291,5 +290,51 @@ public class CryptoUtils {
         }
         
         return possibleTypes;
+    }
+
+    /**
+     * 从内存中分析哈希值
+     * @param hashStr 哈希字符串
+     * @param featureStr 特征字符串（可选）
+     * @param progressCallback 进度回调
+     * @return 分析结果
+     */
+    public static AnalysisResult analyzeHashFromMemory(String hashStr, String featureStr, 
+                                                     Consumer<Integer> progressCallback) {
+        long startTime = System.currentTimeMillis();
+        try {
+            // 调用本地方法
+            String plaintext = analyzeHashNative(hashStr, featureStr, (progress) -> {
+                if (progressCallback != null) {
+                    progressCallback.accept(progress);
+                }
+            });
+            
+            // 计算耗时
+            long timeSpent = System.currentTimeMillis() - startTime;
+            Log.d(TAG, "Hash analysis completed in " + timeSpent + "ms");
+            
+            if (plaintext != null && !plaintext.isEmpty()) {
+                return new AnalysisResult(true, plaintext, timeSpent);
+            } else {
+                return new AnalysisResult(false, null, "未找到原文");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error analyzing hash", e);
+            return new AnalysisResult(false, null, e.getMessage());
+        }
+    }
+    
+    /**
+     * JNI方法：分析哈希
+     */
+    private static native String analyzeHashNative(String hashStr, String featureStr, 
+                                                 ProgressCallback callback);
+    
+    /**
+     * 进度回调接口
+     */
+    public interface ProgressCallback {
+        void onProgress(int percent);
     }
 }

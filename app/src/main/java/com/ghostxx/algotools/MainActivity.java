@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 
 import android.Manifest;
 import android.content.Intent;
@@ -60,7 +61,10 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // 复制转储工具
-        ToolsManager.copyDumpToolIfNeeded(this);
+        boolean toolCopied = ToolsManager.copyDumpToolIfNeeded(this);
+        if (!toolCopied) {
+            Toast.makeText(this, "转储工具准备失败，部分功能可能不可用", Toast.LENGTH_LONG).show();
+        }
 
         // 延迟500ms自动启动服务
         new Handler().postDelayed(() -> {
@@ -95,8 +99,7 @@ public class MainActivity extends AppCompatActivity {
             if (!processMonitor.hasUsageStatsPermission()) {
                 Log.d(TAG, "Usage stats permission pending.");
                 Toast.makeText(this, "请授予应用使用情况访问权限以获取前台应用信息", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                startActivityForResult(intent, REQUEST_USAGE_STATS_PERMISSION);
+                processMonitor.requestUsageStatsPermission();
                 return;
             }
 

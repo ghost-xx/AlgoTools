@@ -34,8 +34,6 @@
             </intent-filter>
         </activity>
         
-
-        
         <service
             android:name=".service.FloatingDumpService"
             android:enabled="true"

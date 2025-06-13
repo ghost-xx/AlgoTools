@@ -10,6 +10,10 @@ public:
     MD5();
     std::string calculate(const std::string& input);
 
+    void update(const uint8_t* input, size_t length);
+
+    void final(uint8_t digest[16]);
+
 private:
     // MD5的四个寄存器
     uint32_t state[4]{};
@@ -21,9 +25,7 @@ private:
     uint8_t padding[64]{};
 
     void transform(const uint8_t block[64]);
-    void update(const uint8_t* input, size_t length);
-    void final(uint8_t digest[16]);
-    
+
     // 辅助函数
     static uint32_t F(uint32_t x, uint32_t y, uint32_t z) { return (x & y) | (~x & z); }
     static uint32_t G(uint32_t x, uint32_t y, uint32_t z) { return (x & z) | (y & ~z); }

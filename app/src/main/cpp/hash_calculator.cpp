@@ -21,12 +21,31 @@ extern bool gEnableJniLog;
 
 // MD5哈希计算
 jstring calculateMD5_native(JNIEnv* env, jclass clazz, jstring input) {
+    if (input == nullptr) {
+        LOG("calculateMD5_native: 输入字符串为 null");
+        return nullptr;
+    }
+    
+    // 获取Java字符串的UTF-8编码
     const char* nativeString = env->GetStringUTFChars(input, nullptr);
-    LOG("正在为输入计算 MD5: %s", nativeString)
+    if (nativeString == nullptr) {
+        LOG("calculateMD5_native: GetStringUTFChars 失败");
+        return nullptr;
+    }
+    
+    // 获取字符串长度
+    jsize utf8Length = env->GetStringUTFLength(input);
+    LOG("正在为输入计算 MD5，UTF-8长度: %d", utf8Length);
+    
+    // 计算MD5
     MD5 md5;
     std::string result_str = md5.calculate(nativeString);
-    LOG("MD5 结果: %s", result_str.c_str())
+    LOG("MD5 结果: %s", result_str.c_str());
+    
+    // 释放资源
     env->ReleaseStringUTFChars(input, nativeString);
+    
+    // 返回结果
     return env->NewStringUTF(result_str.c_str());
 }
 

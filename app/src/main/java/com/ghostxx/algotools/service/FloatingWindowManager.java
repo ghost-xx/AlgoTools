@@ -11,8 +11,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Button;
 
 import com.ghostxx.algotools.R;
 
@@ -28,8 +28,6 @@ public class FloatingWindowManager {
 
     public interface FloatingWindowCallback {
         void onDumpButtonClicked();
-
-
         void onCloseButtonClicked();
     }
 
@@ -48,8 +46,8 @@ public class FloatingWindowManager {
         tvProcessInfo = floatingView.findViewById(R.id.tv_process_info);
         tvLog = floatingView.findViewById(R.id.tv_log);
         expandedLayout = floatingView.findViewById(R.id.expanded_layout);
-        ImageButton btnClose = floatingView.findViewById(R.id.btn_close);
-        ImageButton btnExpand = floatingView.findViewById(R.id.btn_expand);
+        Button btnClose = floatingView.findViewById(R.id.btn_close);
+        Button btnExpand = floatingView.findViewById(R.id.btn_expand);
 
         // 设置按钮点击事件
         btnClose.setOnClickListener(v -> {

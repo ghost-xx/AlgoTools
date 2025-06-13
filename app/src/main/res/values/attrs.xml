@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 输入字段属性 -->
+    <declare-styleable name="InputFieldView">
+        <attr name="inputHint" format="string" />
+        <attr name="android:inputType" />
+        <attr name="android:maxLines" />
+    </declare-styleable>
+    
+    <!-- 结果卡片属性 -->
+    <declare-styleable name="ResultCardView">
+        <attr name="cardTitle" format="string" />
+        <attr name="cardContent" format="string" />
+    </declare-styleable>
+</resources> 
