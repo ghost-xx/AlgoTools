@@ -77,9 +77,7 @@ public class HashRepository {
             // 创建进度回调转换器
             FileProcessingEngine.ProgressCallback engineCallback = null;
                 if (progressCallback != null) {
-                engineCallback = (current, total) -> {
-                    progressCallback.onProgressUpdate(current, total);
-                };
+                engineCallback = progressCallback::onProgressUpdate;
             }
             
             // 执行文件处理

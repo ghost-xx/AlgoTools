@@ -46,20 +46,7 @@ public class HashAnalysisViewModel extends AndroidViewModel {
         hashRepository = new HashRepository(application);
         
         // 设置初始状态消息
-        statusMessage.setValue(getInitialInstructions());
-    }
-    
-    /**
-     * 获取初始指引文本
-     */
-    private String getInitialInstructions() {
-        return "使用步骤：\n" +
-               "1. 点击工具栏菜单中的\"启用悬浮窗\"\n" +
-               "2. 切换到目标应用\n" +
-               "3. 点击悬浮窗中的\"转储\"按钮获取内存数据\n" +
-               "4. 输入哈希值 (支持MD5, SHA-1, SHA-256, SHA-384, SHA-512)\n" +
-               "5. 可选：输入特征字符串以缩小搜索范围\n" +
-               "6. 点击\"分析哈希并在内存中查找原文\"按钮";
+        statusMessage.setValue("请输入哈希值并点击分析按钮\n\n支持: MD5, SHA-1, SHA-256, SHA-384, SHA-512");
     }
     
     /**
@@ -129,10 +116,15 @@ public class HashAnalysisViewModel extends AndroidViewModel {
                 
                 // 处理结果
                 if (result != null && !result.isEmpty()) {
+                    // 保存原文到单独的LiveData中，用于复制
                     lastFoundPlaintext.postValue(result);
+                    
                     mainHandler.post(() -> {
+                        // 设置分析结果
                         analysisResult.setValue(new AnalysisResult(true, result, timeSpent));
-                        statusMessage.setValue(String.format("已找到原文!\n哈希类型: %s\n原文: %s\n处理用时: %.2f秒", 
+                        
+                        // 设置状态消息，包含分析信息但不包含原文
+                        statusMessage.setValue(String.format("哈希类型: %s\n↓↓↓↓↓↓↓↓\n %s\n处理用时: %.2f秒", 
                             identifiedTypes.isEmpty() ? "MD5" : identifiedTypes.get(0),
                             result,
                             timeSpent / 1000.0));

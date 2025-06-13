@@ -1,14 +1,7 @@
 package com.ghostxx.algotools.service;
 
-import android.annotation.SuppressLint;
-import android.app.AppOpsManager;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Process;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -19,10 +12,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * 进程监控类，负责监控前台应用并获取相关信息

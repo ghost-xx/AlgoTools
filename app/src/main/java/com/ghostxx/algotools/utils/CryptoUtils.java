@@ -14,13 +14,13 @@ public class CryptoUtils {
     
     static {
         try {
-            System.loadLibrary("algotools");
+        System.loadLibrary("algotools");
             Log.i(TAG, "algotools loaded successfully");
         } catch (UnsatisfiedLinkError e) {
             Log.e(TAG, "Failed to load algotools", e);
         }
     }
-    
+
     /**
      * 获取系统可用的处理器核心数
      * @return CPU核心数

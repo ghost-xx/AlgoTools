@@ -43,6 +43,9 @@ public class HashAnalysisFragment extends Fragment {
 
     // ViewModel
     private HashAnalysisViewModel viewModel;
+    
+    // 保存找到的原文
+    private String foundPlaintext = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,6 +77,16 @@ public class HashAnalysisFragment extends Fragment {
         
         // 设置JNI日志开关
         setupJniLogging();
+        
+        // 自定义ResultCardView的复制按钮行为
+        resultCardView.setOnCopyButtonClickListener(() -> {
+            if (foundPlaintext != null && !foundPlaintext.isEmpty()) {
+                copyToClipboard(foundPlaintext);
+                showToast("已复制原文到剪贴板");
+                return true; // 返回true表示已处理复制事件
+            }
+            return false; // 返回false表示使用默认复制行为
+        });
     }
     
     /**
@@ -109,6 +122,11 @@ public class HashAnalysisFragment extends Fragment {
                 }
             }
         });
+        
+        // 观察找到的原文
+        viewModel.getLastFoundPlaintext().observe(getViewLifecycleOwner(), plaintext -> {
+            this.foundPlaintext = plaintext;
+        });
     }
     
     /**
@@ -116,11 +134,7 @@ public class HashAnalysisFragment extends Fragment {
      */
     private void handleAnalysisResult(AnalysisResult result) {
         if (result != null) {
-            if (result.isSuccess()) {
-                resultCardView.setCopyButtonVisible(true);
-            } else {
-                resultCardView.setCopyButtonVisible(false);
-            }
+            resultCardView.setCopyButtonVisible(result.isSuccess());
         }
     }
 
@@ -142,6 +156,18 @@ public class HashAnalysisFragment extends Fragment {
         
         // 调用ViewModel进行分析
         viewModel.analyzeHash(hashToAnalyze, featureString);
+    }
+    
+    /**
+     * 复制文本到剪贴板
+     */
+    private void copyToClipboard(String text) {
+        Context context = getContext();
+        if (context != null) {
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("原文", text);
+            clipboard.setPrimaryClip(clip);
+        }
     }
 
     private void showToast(String message) {

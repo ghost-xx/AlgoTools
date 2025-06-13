@@ -9,7 +9,6 @@ import com.ghostxx.algotools.data.mapper.AppProcessMapper;
 import com.ghostxx.algotools.domain.entity.AppProcess;
 import com.ghostxx.algotools.domain.repository.ProcessRepository;
 import com.ghostxx.algotools.service.ProcessMonitor;
-import com.ghostxx.algotools.service.processmonitor.ProcessDetector;
 
 /**
  * 进程仓库实现

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="12dp">
 
     <com.ghostxx.algotools.common.ui.InputFieldView
         android:id="@+id/hashInputView"
@@ -21,47 +21,66 @@
         android:layout_height="wrap_content"
         app:inputHint="特征字符串（可选）"
         android:inputType="text"
+        android:layout_marginTop="8dp"
         android:maxLines="1" />
 
-    <CheckBox
-        android:id="@+id/jniLoggingCheckbox"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="2dp"
-        android:textSize="14sp"
-        android:text="启用 JNI 日志  Logcat 查看"
-        tools:ignore="HardcodedText,ContentDescription" />
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical">
+
+        <CheckBox
+            android:id="@+id/jniLoggingCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="启用 JNI 日志"
+            tools:ignore="HardcodedText,ContentDescription" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="(Logcat查看)"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginStart="4dp"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/analyzeButton"
-        style="@style/Widget.AlgoTools.Button"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
         android:text="在内存中查找原文"
+        app:cornerRadius="8dp"
+        app:icon="@android:drawable/ic_search_category_default"
+        app:iconGravity="textStart"
         tools:ignore="HardcodedText,ContentDescription" />
 
-    <ScrollView
+    <!-- 结果区域 -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true"
-        android:layout_marginTop="4dp"> 
+        android:layout_marginTop="12dp">
 
-        <com.ghostxx.algotools.common.ui.ResultCardView
-            android:id="@+id/resultCardView"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardTitle="分析结果" />
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-    </ScrollView>
-
-    <!-- 原始的 copyPlaintextButton 可以移除或保留作为备用 -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/copyPlaintextButton" 
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="复制明文（旧）"
-        android:visibility="gone" 
-        android:layout_marginTop="4dp"
-        tools:ignore="HardcodedText,ContentDescription" />
+            <com.ghostxx.algotools.common.ui.ResultCardView
+                android:id="@+id/resultCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardTitle="分析结果" />
+        </ScrollView>
+    </FrameLayout>
 
 </LinearLayout> 

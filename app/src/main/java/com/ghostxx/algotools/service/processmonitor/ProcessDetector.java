@@ -167,7 +167,7 @@ public class ProcessDetector {
             ApplicationInfo ai = pm.getApplicationInfo(packageName, 0);
             return (String) pm.getApplicationLabel(ai);
         } catch (Exception e) {
-            Log.e(TAG, "获取应用名称时出错: " + e.getMessage(), e);
+            //Log.e(TAG, "获取应用名称时出错: " + e.getMessage(), e);
             return packageName; // 返回包名作为后备
         }
     }

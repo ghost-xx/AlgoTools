@@ -61,82 +61,82 @@ public class ToolsManager {
 
         if (!needCopy) {
             return true; // 工具已存在且可执行
-        }
+            }
 
-        Log.i(TAG, "开始复制dumpmm工具...");
-        try {
-            // 1. 先复制到 app 私有 cache 目录
-            File cacheFile = new File(context.getCacheDir(), toolName);
-            InputStream is = null;
+            Log.i(TAG, "开始复制dumpmm工具...");
             try {
-                // 尝试从指定架构目录读取
-                is = context.getAssets().open(assetDir + "/" + toolName);
-                Log.i(TAG, "从 " + assetDir + " 目录找到dumpmm工具");
-            } catch (IOException e) {
-                Log.w(TAG, "无法从 " + assetDir + " 目录读取dumpmm工具，尝试其他目录: " + e.getMessage());
-                // 尝试其他架构目录
-                String[] dirs = {"arm64-v8a", "armeabi-v7a", "x86_64", "x86"};
-                for (String dir : dirs) {
-                    if (dir.equals(assetDir)) continue;
-                    try {
-                        is = context.getAssets().open(dir + "/" + toolName);
-                        Log.i(TAG, "从 " + dir + " 目录找到dumpmm工具");
-                        break;
-                    } catch (IOException ignored) {
-                        Log.d(TAG, "在 " + dir + " 目录中未找到dumpmm工具");
+                // 1. 先复制到 app 私有 cache 目录
+                File cacheFile = new File(context.getCacheDir(), toolName);
+                InputStream is = null;
+                try {
+                    // 尝试从指定架构目录读取
+                    is = context.getAssets().open(assetDir + "/" + toolName);
+                    Log.i(TAG, "从 " + assetDir + " 目录找到dumpmm工具");
+                } catch (IOException e) {
+                    Log.w(TAG, "无法从 " + assetDir + " 目录读取dumpmm工具，尝试其他目录: " + e.getMessage());
+                    // 尝试其他架构目录
+                    String[] dirs = {"arm64-v8a", "armeabi-v7a", "x86_64", "x86"};
+                    for (String dir : dirs) {
+                        if (dir.equals(assetDir)) continue;
+                        try {
+                            is = context.getAssets().open(dir + "/" + toolName);
+                            Log.i(TAG, "从 " + dir + " 目录找到dumpmm工具");
+                            break;
+                        } catch (IOException ignored) {
+                            Log.d(TAG, "在 " + dir + " 目录中未找到dumpmm工具");
+                        }
+                    }
+                    // 如果还是找不到，尝试直接从assets根目录读取
+                    if (is == null) {
+                        try {
+                            is = context.getAssets().open(toolName);
+                            Log.i(TAG, "从assets根目录找到dumpmm工具");
+                        } catch (IOException ignored) {
+                            Log.e(TAG, "在assets根目录中未找到dumpmm工具");
+                        }
                     }
                 }
-                // 如果还是找不到，尝试直接从assets根目录读取
+
                 if (is == null) {
-                    try {
-                        is = context.getAssets().open(toolName);
-                        Log.i(TAG, "从assets根目录找到dumpmm工具");
-                    } catch (IOException ignored) {
-                        Log.e(TAG, "在assets根目录中未找到dumpmm工具");
+                    Log.e(TAG, "无法在assets中找到dumpmm工具");
+                    Toast.makeText(context, "无法找到内存转储辅助工具，部分功能可能受限", Toast.LENGTH_LONG).show();
+                return false;
+                }
+
+                FileOutputStream fos = new FileOutputStream(cacheFile);
+                byte[] buffer = new byte[4096];
+                int len;
+                while ((len = is.read(buffer)) != -1) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+                is.close();
+                // 2. 用 root 权限移动到 /data/local/tmp 并赋予 777
+                String cmd = "cp " + cacheFile.getAbsolutePath() + " /data/local/tmp/" + toolName + " && chmod 777 /data/local/tmp/" + toolName;
+                Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
+                int exitCode = p.waitFor();
+                if (exitCode == 0) {
+                    Log.i(TAG, "成功复制dumpmm工具到/data/local/tmp并设置权限");
+                return true;
+                } else {
+                    Log.e(TAG, "复制dumpmm工具失败，退出码: " + exitCode);
+                    // 尝试使用cat命令作为备用方案
+                    cmd = "cat " + cacheFile.getAbsolutePath() + " > /data/local/tmp/" + toolName + " && chmod 777 /data/local/tmp/" + toolName;
+                    p = Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
+                    exitCode = p.waitFor();
+                    if (exitCode == 0) {
+                        Log.i(TAG, "使用cat命令成功复制dumpmm工具");
+                    return true;
+                    } else {
+                        Log.e(TAG, "使用cat命令复制dumpmm工具失败，退出码: " + exitCode);
+                        Toast.makeText(context, "复制内存转储辅助工具失败，部分功能可能受限", Toast.LENGTH_LONG).show();
+                    return false;
                     }
                 }
-            }
 
-            if (is == null) {
-                Log.e(TAG, "无法在assets中找到dumpmm工具");
-                Toast.makeText(context, "无法找到内存转储辅助工具，部分功能可能受限", Toast.LENGTH_LONG).show();
-                return false;
-            }
-
-            FileOutputStream fos = new FileOutputStream(cacheFile);
-            byte[] buffer = new byte[4096];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                fos.write(buffer, 0, len);
-            }
-            fos.close();
-            is.close();
-            // 2. 用 root 权限移动到 /data/local/tmp 并赋予 777
-            String cmd = "cp " + cacheFile.getAbsolutePath() + " /data/local/tmp/" + toolName + " && chmod 777 /data/local/tmp/" + toolName;
-            Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
-            int exitCode = p.waitFor();
-            if (exitCode == 0) {
-                Log.i(TAG, "成功复制dumpmm工具到/data/local/tmp并设置权限");
-                return true;
-            } else {
-                Log.e(TAG, "复制dumpmm工具失败，退出码: " + exitCode);
-                // 尝试使用cat命令作为备用方案
-                cmd = "cat " + cacheFile.getAbsolutePath() + " > /data/local/tmp/" + toolName + " && chmod 777 /data/local/tmp/" + toolName;
-                p = Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
-                exitCode = p.waitFor();
-                if (exitCode == 0) {
-                    Log.i(TAG, "使用cat命令成功复制dumpmm工具");
-                    return true;
-                } else {
-                    Log.e(TAG, "使用cat命令复制dumpmm工具失败，退出码: " + exitCode);
-                    Toast.makeText(context, "复制内存转储辅助工具失败，部分功能可能受限", Toast.LENGTH_LONG).show();
-                    return false;
-                }
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, "复制dumpmm工具出错: " + e.getMessage(), e);
-            Toast.makeText(context, "复制内存转储辅助工具失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Log.e(TAG, "复制dumpmm工具出错: " + e.getMessage(), e);
+                Toast.makeText(context, "复制内存转储辅助工具失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
             return false;
         }
     }

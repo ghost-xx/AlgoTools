@@ -197,7 +197,9 @@ public class MainActivity extends AppCompatActivity {
                     "1. 应用启动后会自动开启悬浮窗服务\n" +
                     "2. 切换到目标应用\n" +
                     "3. 点击悬浮窗中的转储按钮\n" +
-                    "4. 在 AlgoTools/dumps 目录下查看转储文件")
+                    "5. 输入哈希值 (支持MD5, SHA-1, SHA-256, SHA-384, SHA-512)\n" +
+                    "6. 可选：输入特征字符串以缩小搜索范围\n" +
+                    "7. 点击\"在内存中查找原文\"按钮")
             .setPositiveButton("确定", null)
             .show();
     }
