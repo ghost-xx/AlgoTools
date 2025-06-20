@@ -12,8 +12,6 @@ add_library(
         algotools
         SHARED
         native-lib.cpp
-        hash_calculator.cpp
-        hash_calculator.h
         string_search.cpp
         string_search.h
         memory_utils.cpp

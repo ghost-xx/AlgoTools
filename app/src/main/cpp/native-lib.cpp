@@ -2,7 +2,6 @@
 #include <string>
 #include <cstring>
 #include <android/log.h>
-#include "hash_calculator.h"
 #include "string_search.h"
 #include "memory_utils.h"
 
@@ -174,31 +173,7 @@ static const JNINativeMethod gMethods[] = {
         "(Z)V",
         (void*)setJniLoggingEnabled_native
     },
-    {
-        "calculateMD5",
-        "(Ljava/lang/String;)Ljava/lang/String;",
-        (void*)calculateMD5_native
-    },
-    {
-        "calculateSHA1",
-        "(Ljava/lang/String;)Ljava/lang/String;",
-        (void*)calculateSHA1_native
-    },
-    {
-        "calculateSHA256",
-        "(Ljava/lang/String;)Ljava/lang/String;",
-        (void*)calculateSHA256_native
-    },
-    {
-        "calculateSHA384",
-        "(Ljava/lang/String;)Ljava/lang/String;",
-        (void*)calculateSHA384_native
-    },
-    {
-        "calculateSHA512",
-        "(Ljava/lang/String;)Ljava/lang/String;",
-        (void*)calculateSHA512_native
-    },
+
     {
         "containsFeatureString",
         "([BILjava/lang/String;)Z",
@@ -219,9 +194,9 @@ jint JNI_OnLoad(JavaVM* vm, __attribute__((unused)) void* reserved) {
         return JNI_ERR;
     }
 
-    jclass clazz = env->FindClass("com/ghostxx/algotools/utils/CryptoUtils");
+    jclass clazz = env->FindClass("com/ghostxx/algotools/utils/HashCryptoUtils");
     if (clazz == nullptr) {
-        LOG("JNI_OnLoad: 找不到类 com/ghostxx/algotools/utils/CryptoUtils")
+        LOG("JNI_OnLoad: 找不到类 com/ghostxx/algotools/utils/HashCryptoUtils")
         return JNI_ERR;
     }
 

@@ -9,11 +9,10 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.ghostxx.algotools.model.AnalysisResult;
 import com.ghostxx.algotools.repository.HashRepository;
-import com.ghostxx.algotools.utils.CryptoUtils;
+import com.ghostxx.algotools.utils.HashCryptoUtils;
 
 import java.io.File;
 import java.util.List;
@@ -70,7 +69,7 @@ public class HashAnalysisViewModel extends AndroidViewModel {
         hashToAnalyze = hashToAnalyze.trim().toLowerCase();
         
         // 识别哈希类型
-        List<String> identifiedTypes = CryptoUtils.identifyHashType(hashToAnalyze);
+        List<String> identifiedTypes = HashCryptoUtils.identifyHashType(hashToAnalyze);
         StringBuilder statusInfo = buildInitialStatus(identifiedTypes);
         
         if (!canCrackHash(hashToAnalyze, identifiedTypes, statusInfo)) {
@@ -159,8 +158,8 @@ public class HashAnalysisViewModel extends AndroidViewModel {
         if (identifiedTypes.isEmpty()) {
             status.append("无法识别的哈希类型或无效哈希格式。\n");
         } else {
-            status.append("当前CPU核心数: ").append(CryptoUtils.getAvailableProcessors()).append("\n");
-            status.append("当前线程数: ").append(CryptoUtils.getThreadCount()).append("\n");
+            status.append("当前CPU核心数: ").append(HashCryptoUtils.getAvailableProcessors()).append("\n");
+            status.append("当前线程数: ").append(HashCryptoUtils.getThreadCount()).append("\n");
         }
         return status;
     }

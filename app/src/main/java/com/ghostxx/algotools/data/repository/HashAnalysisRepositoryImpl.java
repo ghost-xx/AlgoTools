@@ -8,11 +8,9 @@ import com.ghostxx.algotools.domain.entity.MemoryDump;
 import com.ghostxx.algotools.domain.repository.HashAnalysisRepository;
 import com.ghostxx.algotools.repository.fileprocessing.FileProcessingEngine;
 import com.ghostxx.algotools.repository.fileprocessing.HashSearchProcessor;
-import com.ghostxx.algotools.utils.CryptoUtils;
+import com.ghostxx.algotools.utils.HashCryptoUtils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -85,7 +83,7 @@ public class HashAnalysisRepositoryImpl implements HashAnalysisRepository {
             return new String[0];
         }
         
-        List<String> identifiedTypes = CryptoUtils.identifyHashType(hash);
+        List<String> identifiedTypes = HashCryptoUtils.identifyHashType(hash);
         return identifiedTypes.toArray(new String[0]);
     }
     

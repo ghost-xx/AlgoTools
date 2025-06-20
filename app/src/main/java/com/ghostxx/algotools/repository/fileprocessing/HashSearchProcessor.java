@@ -2,7 +2,7 @@ package com.ghostxx.algotools.repository.fileprocessing;
 
 import android.util.Log;
 
-import com.ghostxx.algotools.utils.CryptoUtils;
+import com.ghostxx.algotools.utils.HashCryptoUtils;
 
 /**
  * 哈希搜索处理器
@@ -31,14 +31,14 @@ public class HashSearchProcessor implements FileChunkProcessor {
     public String processChunk(byte[] data, int dataSize) {
         // 如果提供了特征字符串，先检查数据是否包含该字符串
         if (featureString != null && !featureString.isEmpty()) {
-            boolean containsFeature = CryptoUtils.containsFeatureString(data, dataSize, featureString);
+            boolean containsFeature = HashCryptoUtils.containsFeatureString(data, dataSize, featureString);
             if (!containsFeature) {
                 return null; // 不包含特征字符串，跳过
             }
         }
         
         // 在数据中查找哈希值的原文
-        String result = CryptoUtils.findHashOriginal(data, dataSize, hashToCrack, hashType, featureString);
+        String result = HashCryptoUtils.findHashOriginal(data, dataSize, hashToCrack, hashType, featureString);
         if (result != null) {
             Log.d(TAG, "找到哈希值 " + hashToCrack + " 的原文: " + result);
         }

@@ -21,7 +21,7 @@ import com.ghostxx.algotools.R;
 import com.ghostxx.algotools.common.ui.InputFieldView;
 import com.ghostxx.algotools.common.ui.ResultCardView;
 import com.ghostxx.algotools.model.AnalysisResult;
-import com.ghostxx.algotools.utils.CryptoUtils;
+import com.ghostxx.algotools.utils.HashCryptoUtils;
 import com.ghostxx.algotools.viewmodel.HashAnalysisViewModel;
 
 /**
@@ -140,12 +140,12 @@ public class HashAnalysisFragment extends Fragment {
 
     private void setupJniLogging() {
         jniLoggingCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            CryptoUtils.enableJniLogging(isChecked);
+            HashCryptoUtils.enableJniLogging(isChecked);
             String status = isChecked ? "已启用" : "已禁用";
             showToast("JNI 日志 " + status);
         });
         
-        CryptoUtils.enableJniLogging(false);
+        HashCryptoUtils.enableJniLogging(false);
         jniLoggingCheckbox.setChecked(false);
     }
     
